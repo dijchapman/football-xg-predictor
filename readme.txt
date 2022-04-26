@@ -1,0 +1,1 @@
+This project will allow you to predict a single football match or simulate a league season.
