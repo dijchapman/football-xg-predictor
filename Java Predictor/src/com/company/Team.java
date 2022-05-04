@@ -10,8 +10,10 @@ public class Team {
     private double awayGoalsAgainst;
     private double awayXGFor;
     private double awayXGAgainst;
+    private int currentPointsTally;
+    private int predictedPointsTally;
 
-    public Team(String name, double hgf, double hga, double hxgf, double hxga, double agf, double aga, double axgf, double axga) {
+    public Team(String name, double hgf, double hga, double hxgf, double hxga, double agf, double aga, double axgf, double axga, int points) {
         this.teamName = name;
         this.homeGoalsFor = hgf;
         this.homeGoalsAgainst = hga;
@@ -21,6 +23,8 @@ public class Team {
         this.awayGoalsAgainst = aga;
         this.awayXGFor = axgf;
         this.awayXGAgainst = axga;
+        this.currentPointsTally = points;
+        this.predictedPointsTally = 0;
     }
 
     public String getTeamName() { return teamName; }

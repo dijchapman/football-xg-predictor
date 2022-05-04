@@ -28,7 +28,9 @@ public class FBRefScraper {
                     double awayXGoalsFor = Double.parseDouble(row.select("td.right:nth-of-type(24)").text()) / awayGames;
                     double awayXGoalsAgainst = Double.parseDouble(row.select("td.right:nth-of-type(25)").text()) / awayGames;
 
-                    Team newTeam = new Team(teamName, homeGoalsFor, homeGoalsAgainst, homeXGoalsFor, homeXGoalsAgainst, awayGoalsFor, awayGoalsAgainst, awayXGoalsFor, awayXGoalsAgainst);
+                    int pointsTally = Integer.parseInt(row.select("td.right:nth-of-type(9)").text()) + Integer.parseInt(row.select("td.right:nth-of-type(22)").text());
+
+                    Team newTeam = new Team(teamName, homeGoalsFor, homeGoalsAgainst, homeXGoalsFor, homeXGoalsAgainst, awayGoalsFor, awayGoalsAgainst, awayXGoalsFor, awayXGoalsAgainst, pointsTally);
                     teamData.add(newTeam);
                 }
             }
