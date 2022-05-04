@@ -43,9 +43,9 @@ public class FBRefScraper {
         return null;
     }
 
-    public void getRemainingFixtures() {
+    public ArrayList<Fixture> getRemainingFixtures() {
         try {
-            ArrayList<Team> teamData = new ArrayList<>();
+            ArrayList<Fixture> remainingFixtures = new ArrayList<>();
             String urlLeagueSeason = "https://fbref.com/en/comps/9/schedule/Premier-League-Scores-and-Fixtures";
             final Document document = Jsoup.connect(urlLeagueSeason).get();
             for (Element row : document.select("table#sched_11160_1 tr")) {
@@ -53,11 +53,16 @@ public class FBRefScraper {
                     String homeTeam = row.select("td.right:nth-of-type(4)").text();
                     String awayTeam = row.select("td.left:nth-of-type(8)").text();
 
-                    System.out.println(homeTeam + " vs " + awayTeam);
+                    Fixture newFixture = new Fixture(homeTeam, awayTeam);
+                    remainingFixtures.add(newFixture);
                 }
             }
+
+            return remainingFixtures;
         } catch (Exception e) {
             System.out.println("getRemainingFixtures: " + e.getMessage());
         }
+
+        return null;
     }
 }

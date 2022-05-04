@@ -9,7 +9,7 @@ public class PredictorCalculations {
         return attackStrength * defenceStrength * leagueGoalsAverage;
     }
 
-    public void predictGamePoisson(String homeTeam, String awayTeam, double homeExpGoals, double awayExpGoals) {
+    public String predictGamePoisson(String homeTeam, String awayTeam, double homeExpGoals, double awayExpGoals) {
         double[] homeGoalChances = goalChances(homeExpGoals);
         double[] awayGoalChances = goalChances(awayExpGoals);
 
@@ -47,9 +47,25 @@ public class PredictorCalculations {
         drawChance = (double) Math.round(drawChance * 10) / 10;
 
         // System.out.printf(format, "Total", awayGoalChanceTotals[0], awayGoalChanceTotals[1], awayGoalChanceTotals[2], awayGoalChanceTotals[3], awayGoalChanceTotals[4], awayGoalChanceTotals[5], "100.0");
-        System.out.println(homeTeam + " Win Chance: " + homeWinChance + "%");
-        System.out.println(awayTeam + " Win Chance: " + awayWinChance + "%");
-        System.out.println("Draw Chance: " + drawChance + "%");
+        // System.out.println(homeTeam + " Win Chance: " + homeWinChance + "%");
+        // System.out.println(awayTeam + " Win Chance: " + awayWinChance + "%");
+        // System.out.println("Draw Chance: " + drawChance + "%");
+
+        return simulateGame(homeGoalChances, awayGoalChances, homeExpGoals, awayExpGoals);
+    }
+
+    public String simulateGame(double[] homeGoalChances, double[] awayGoalChances, double homeExpGoals, double awayExpGoals) {
+        int homeGoalsSimulation = goalsScoredSimulation(homeGoalChances);
+        int awayGoalsSimulation = goalsScoredSimulation(awayGoalChances);
+
+        if (homeGoalsSimulation > awayGoalsSimulation) {
+            return "home win";
+        }
+        else if (awayGoalsSimulation > homeGoalsSimulation) {
+            return "away win";
+        }
+
+        return "draw";
     }
 
     public double[] goalChances(double expGoals) {
@@ -71,5 +87,18 @@ public class PredictorCalculations {
             factorial *= fact;
         }
         return (Math.pow(mean, goals) * Math.exp(-mean)) / factorial;
+    }
+
+    public int goalsScoredSimulation(double[] goalChances) {
+        double chanceTally = 0.0;
+        double goalSimulation = Math.random();
+        for (int goals = 0; goals < 6; goals++) {
+            chanceTally += goalChances[goals];
+
+            if (goalSimulation < chanceTally)
+                return goals;
+        }
+
+        return 0;
     }
 }

@@ -37,11 +37,17 @@ public class Team {
 
     public double getAwayGoalsAgainst() { return awayGoalsAgainst; }
 
+    public double getHomeXGAgainst() { return homeXGAgainst; }
+
+    public double getHomeXGFor() { return homeXGFor; }
+
     public double getAwayXGAgainst() { return awayXGAgainst; }
 
     public double getAwayXGFor() { return awayXGFor; }
 
-    public double getHomeXGAgainst() { return homeXGAgainst; }
+    public int getCurrentPointsTally() { return currentPointsTally; }
 
-    public double getHomeXGFor() { return homeXGFor; }
+    public int getPredictedPointsTally() { return predictedPointsTally; }
+
+    public void setPredictedPointsTally(int points) { this.predictedPointsTally = points; }
 }

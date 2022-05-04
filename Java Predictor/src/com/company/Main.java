@@ -16,10 +16,10 @@ public class Main {
         String awayTeam = "Liverpool";
         //mainApp.predictFixture(predictorCalculations, teamData, homeTeam, awayTeam);
 
-        webScraper.getRemainingFixtures();
+        mainApp.predictRemainingFixtures(predictorCalculations, webScraper, teamData);
     }
 
-    public void predictFixture(PredictorCalculations predictorCalculations, ArrayList<Team> teamData, String homeTeam, String awayTeam) {
+    public String predictFixture(PredictorCalculations predictorCalculations, ArrayList<Team> teamData, String homeTeam, String awayTeam) {
         double averageHomeTeamGoals = teamData.stream().mapToDouble(Team::getHomeGoalsFor).average().orElse(0.0);
         double averageHomeTeamXG = teamData.stream().mapToDouble(Team::getHomeXGFor).average().orElse(0.0);
         double averageHomeTeamXGAgainst = teamData.stream().mapToDouble(Team::getHomeXGAgainst).average().orElse(0.0);
@@ -38,10 +38,38 @@ public class Main {
         double homeExpGoals = predictorCalculations.calculatePredictedXG(homeAttackStrength, awayDefenceStrength, averageHomeTeamGoals);
         double awayExpGoals = predictorCalculations.calculatePredictedXG(awayAttackStrength, homeDefenceStrength, averageAwayTeamGoals);
 
-        predictorCalculations.predictGamePoisson(homeTeam, awayTeam, homeExpGoals, awayExpGoals);
+        return predictorCalculations.predictGamePoisson(homeTeam, awayTeam, homeExpGoals, awayExpGoals);
     }
 
-    public void predictRemainingFixtures(PredictorCalculations predictorCalculations, FBRefScraper webScraper, ) {
+    public void predictRemainingFixtures(PredictorCalculations predictorCalculations, FBRefScraper webScraper, ArrayList<Team> teamData) {
+        ArrayList<Fixture> remainingFixtures = webScraper.getRemainingFixtures();
 
+        remainingFixtures.forEach((fixture -> {
+            String resultSimulation = predictFixture(predictorCalculations, teamData, fixture.getHomeTeam(), fixture.getAwayTeam());
+            System.out.print(fixture.getHomeTeam() + " vs " + fixture.getAwayTeam() + " = ");
+            switch (resultSimulation) {
+                case "home win":
+                    System.out.println(fixture.getHomeTeam() + " win");
+                    updateTeamPointsTally(teamData, fixture.getHomeTeam(), 3);
+                    break;
+                case "away win":
+                    System.out.println(fixture.getAwayTeam() + " win");
+                    updateTeamPointsTally(teamData, fixture.getAwayTeam(), 3);
+                    break;
+                case "draw":
+                    System.out.println("draw");
+                    updateTeamPointsTally(teamData, fixture.getHomeTeam(), 1);
+                    updateTeamPointsTally(teamData, fixture.getAwayTeam(), 1);
+                    break;
+            }
+        }));
+    }
+
+    public ArrayList<Team> updateTeamPointsTally(ArrayList<Team> teamData, String teamName, int points) {
+        teamData.stream().filter(team -> team.getTeamName().equals(teamName)).forEach(team -> {
+            team.setPredictedPointsTally(team.getPredictedPointsTally() + points);
+        });
+
+        return teamData;
     }
 }
