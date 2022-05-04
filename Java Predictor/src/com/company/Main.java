@@ -10,16 +10,16 @@ public class Main {
         PredictorCalculations predictorCalculations = new PredictorCalculations();
         FBRefScraper webScraper = new FBRefScraper();
 
+        ArrayList<Team> teamData = webScraper.getTeamData();
+
         String homeTeam = "Manchester City";
         String awayTeam = "Liverpool";
-        //mainApp.predictFixture(predictorCalculations, webScraper, homeTeam, awayTeam);
+        //mainApp.predictFixture(predictorCalculations, teamData, homeTeam, awayTeam);
 
         webScraper.getRemainingFixtures();
     }
 
-    public void predictFixture(PredictorCalculations predictorCalculations, FBRefScraper webScraper, String homeTeam, String awayTeam) {
-        ArrayList<Team> teamData = webScraper.getTeamData();
-
+    public void predictFixture(PredictorCalculations predictorCalculations, ArrayList<Team> teamData, String homeTeam, String awayTeam) {
         double averageHomeTeamGoals = teamData.stream().mapToDouble(Team::getHomeGoalsFor).average().orElse(0.0);
         double averageHomeTeamXG = teamData.stream().mapToDouble(Team::getHomeXGFor).average().orElse(0.0);
         double averageHomeTeamXGAgainst = teamData.stream().mapToDouble(Team::getHomeXGAgainst).average().orElse(0.0);
@@ -39,5 +39,9 @@ public class Main {
         double awayExpGoals = predictorCalculations.calculatePredictedXG(awayAttackStrength, homeDefenceStrength, averageAwayTeamGoals);
 
         predictorCalculations.predictGamePoisson(homeTeam, awayTeam, homeExpGoals, awayExpGoals);
+    }
+
+    public void predictRemainingFixtures(PredictorCalculations predictorCalculations, FBRefScraper webScraper, ) {
+
     }
 }
