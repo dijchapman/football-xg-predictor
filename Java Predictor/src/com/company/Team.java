@@ -1,5 +1,7 @@
 package com.company;
 
+import java.util.Arrays;
+
 public class Team {
     private String teamName;
     private double homeGoalsFor;
@@ -13,6 +15,7 @@ public class Team {
     private int currentPointsTally;
     private int predictedPointsTally;
     private int totalPredictedPointsTally;
+    private int[] simulatedLeaguePositions;
 
     public Team(String name, double hgf, double hga, double hxgf, double hxga, double agf, double aga, double axgf, double axga, int points) {
         this.teamName = name;
@@ -27,6 +30,8 @@ public class Team {
         this.currentPointsTally = points;
         this.predictedPointsTally = 0;
         this.totalPredictedPointsTally = 0;
+        this.simulatedLeaguePositions = new int[20];
+        Arrays.fill(simulatedLeaguePositions, 0);
     }
 
     public String getTeamName() { return teamName; }
@@ -56,4 +61,8 @@ public class Team {
     public int getTotalPredictedPointsTally() { return totalPredictedPointsTally; }
 
     public void setTotalPredictedPointsTally(int points) { this.totalPredictedPointsTally = points; }
+
+    public int[] getSimulatedLeaguePositions() { return simulatedLeaguePositions; }
+
+    public void setSimulatedLeaguePositions(int position) { this.simulatedLeaguePositions[position - 1] = this.simulatedLeaguePositions[position - 1] + 1; }
 }

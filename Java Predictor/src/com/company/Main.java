@@ -18,20 +18,45 @@ public class Main {
         String awayTeam = "Liverpool";
         //mainApp.predictFixture(predictorCalculations, teamData, homeTeam, awayTeam);
 
-        int numberOfSimulations = 10;
+        int numberOfSimulations = 100;
         mainApp.runMultipleSimulations(predictorCalculations, teamData, remainingFixtures, numberOfSimulations);
     }
 
     private static int leaguePosition = 1;
-    public void showLeagueTable(ArrayList<Team> teamData, int numberOfSimulations) {
-        String format = "%2s %-25s %3d%n";
+    public void showLeagueTableSingleSimulation(ArrayList<Team> teamData, boolean display) {
+        String format = "%2s %-25s %5s%n";
+        leaguePosition = 1;
+
+        teamData.stream().sorted((t1, t2) -> Long.compare(
+                t2.getCurrentPointsTally() + t2.getPredictedPointsTally(),
+                t1.getCurrentPointsTally() + t1.getPredictedPointsTally()
+                )).forEach(t -> {
+            float finalPointsTally = t.getCurrentPointsTally() + t.getPredictedPointsTally();
+            if (display)
+                System.out.printf(format, leaguePosition, t.getTeamName(), finalPointsTally, t.getSimulatedLeaguePositions()[0]);
+            else
+                teamData.stream().filter(team -> team.getTeamName().equals(t.getTeamName())).forEach((team) -> {
+                    team.setSimulatedLeaguePositions(leaguePosition);
+                });
+            leaguePosition++;
+        });
+    }
+
+    public void showLeagueTableMultipleSimulations(ArrayList<Team> teamData, int numberOfSimulations) {
+        String format = "%2s %-25s %5s";
+        leaguePosition = 1;
 
         teamData.stream().sorted((t1, t2) -> Long.compare(
                 t2.getCurrentPointsTally() + (t2.getTotalPredictedPointsTally() / numberOfSimulations),
                 t1.getCurrentPointsTally() + (t1.getTotalPredictedPointsTally() / numberOfSimulations)
-                )).forEach(t -> {
-            int finalPointsTally = t.getCurrentPointsTally() + (t.getTotalPredictedPointsTally() / numberOfSimulations);
+        )).forEach(t -> {
+            float finalPointsTally = t.getCurrentPointsTally() + (t.getTotalPredictedPointsTally() / numberOfSimulations);
             System.out.printf(format, leaguePosition, t.getTeamName(), finalPointsTally);
+            for (int f:t.getSimulatedLeaguePositions())
+                System.out.printf("%5d ", f);
+            System.out.println();
+            if (leaguePosition == 4 || leaguePosition == 6 || leaguePosition == 17)
+                System.out.println("-----------------------------------------");
             leaguePosition++;
         });
     }
@@ -44,8 +69,8 @@ public class Main {
         double averageAwayTeamXG = teamData.stream().mapToDouble(Team::getAwayXGFor).average().orElse(0.0);
         double averageAwayTeamXGAgainst = teamData.stream().mapToDouble(Team::getAwayXGAgainst).average().orElse(0.0);
 
-        Team homeTeamData = teamData.stream().filter(a -> a.getTeamName().equals(homeTeam)).collect(Collectors.toList()).get(0);
-        Team awayTeamData = teamData.stream().filter(a -> a.getTeamName().equals(awayTeam)).collect(Collectors.toList()).get(0);
+        Team homeTeamData = teamData.stream().filter(t -> t.getTeamName().equals(homeTeam)).collect(Collectors.toList()).get(0);
+        Team awayTeamData = teamData.stream().filter(t -> t.getTeamName().equals(awayTeam)).collect(Collectors.toList()).get(0);
 
         double homeAttackStrength = predictorCalculations.calculateStrengthRating(homeTeamData.getHomeXGFor(), averageHomeTeamXG);
         double homeDefenceStrength = predictorCalculations.calculateStrengthRating(homeTeamData.getHomeXGAgainst(), averageHomeTeamXGAgainst);
@@ -70,10 +95,13 @@ public class Main {
             teamData.forEach((team -> {
                 team.setTotalPredictedPointsTally(team.getTotalPredictedPointsTally() + team.getPredictedPointsTally());
             }));
+
+            // update simulated league position team array
+            showLeagueTableSingleSimulation(teamData, false);
         }
 
         System.out.println("After running " + numberOfSimulations + " simulations, the league table is:");
-        showLeagueTable(teamData, numberOfSimulations);
+        showLeagueTableMultipleSimulations(teamData, numberOfSimulations);
     }
 
     public void predictRemainingFixtures(PredictorCalculations predictorCalculations, ArrayList<Team> teamData, ArrayList<Fixture> remainingFixtures) {
