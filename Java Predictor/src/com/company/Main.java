@@ -43,15 +43,15 @@ public class Main {
     }
 
     public void showLeagueTableMultipleSimulations(ArrayList<Team> teamData, int numberOfSimulations) {
-        String format = "%2s %-25s %5s";
+        String format = "%2s %-25s %4s";
         leaguePosition = 1;
 
         teamData.stream().sorted((t1, t2) -> Long.compare(
                 t2.getCurrentPointsTally() + (t2.getTotalPredictedPointsTally() / numberOfSimulations),
                 t1.getCurrentPointsTally() + (t1.getTotalPredictedPointsTally() / numberOfSimulations)
         )).forEach(t -> {
-            float finalPointsTally = t.getCurrentPointsTally() + (t.getTotalPredictedPointsTally() / numberOfSimulations);
-            System.out.printf(format, leaguePosition, t.getTeamName(), finalPointsTally);
+            double finalPointsTally = (double) t.getCurrentPointsTally() + ((double) t.getTotalPredictedPointsTally() / (double) numberOfSimulations);
+            System.out.printf(format, leaguePosition, t.getTeamName(), (double) Math.round(finalPointsTally * 10) / 10);
             for (int f:t.getSimulatedLeaguePositions())
                 System.out.printf("%5d ", f);
             System.out.println();
