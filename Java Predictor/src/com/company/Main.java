@@ -1,6 +1,7 @@
 package com.company;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -11,12 +12,28 @@ public class Main {
         FBRefScraper webScraper = new FBRefScraper();
 
         ArrayList<Team> teamData = webScraper.getTeamData();
+        ArrayList<Fixture> remainingFixtures = webScraper.getRemainingFixtures();
 
         String homeTeam = "Manchester City";
         String awayTeam = "Liverpool";
         //mainApp.predictFixture(predictorCalculations, teamData, homeTeam, awayTeam);
 
-        mainApp.predictRemainingFixtures(predictorCalculations, webScraper, teamData);
+        int numberOfSimulations = 10;
+        mainApp.runMultipleSimulations(predictorCalculations, teamData, remainingFixtures, numberOfSimulations);
+    }
+
+    private static int leaguePosition = 1;
+    public void showLeagueTable(ArrayList<Team> teamData, int numberOfSimulations) {
+        String format = "%2s %-25s %3d%n";
+
+        teamData.stream().sorted((t1, t2) -> Long.compare(
+                t2.getCurrentPointsTally() + (t2.getTotalPredictedPointsTally() / numberOfSimulations),
+                t1.getCurrentPointsTally() + (t1.getTotalPredictedPointsTally() / numberOfSimulations)
+                )).forEach(t -> {
+            int finalPointsTally = t.getCurrentPointsTally() + (t.getTotalPredictedPointsTally() / numberOfSimulations);
+            System.out.printf(format, leaguePosition, t.getTeamName(), finalPointsTally);
+            leaguePosition++;
+        });
     }
 
     public String predictFixture(PredictorCalculations predictorCalculations, ArrayList<Team> teamData, String homeTeam, String awayTeam) {
@@ -41,23 +58,38 @@ public class Main {
         return predictorCalculations.predictGamePoisson(homeTeam, awayTeam, homeExpGoals, awayExpGoals);
     }
 
-    public void predictRemainingFixtures(PredictorCalculations predictorCalculations, FBRefScraper webScraper, ArrayList<Team> teamData) {
-        ArrayList<Fixture> remainingFixtures = webScraper.getRemainingFixtures();
+    public void runMultipleSimulations(PredictorCalculations predictorCalculations, ArrayList<Team> teamData, ArrayList<Fixture> remainingFixtures, int numberOfSimulations) {
+        // reset total predicted points tally for each team
+        teamData.forEach((team -> team.setTotalPredictedPointsTally(0)));
+
+        // run simulations
+        for (int simulation = 0; simulation < numberOfSimulations; simulation++) {
+            predictRemainingFixtures(predictorCalculations, teamData, remainingFixtures);
+
+            // add simulated points tally to total simulated points tally
+            teamData.forEach((team -> {
+                team.setTotalPredictedPointsTally(team.getTotalPredictedPointsTally() + team.getPredictedPointsTally());
+            }));
+        }
+
+        System.out.println("After running " + numberOfSimulations + " simulations, the league table is:");
+        showLeagueTable(teamData, numberOfSimulations);
+    }
+
+    public void predictRemainingFixtures(PredictorCalculations predictorCalculations, ArrayList<Team> teamData, ArrayList<Fixture> remainingFixtures) {
+        // reset predicted points tally for each team
+        teamData.forEach((team -> team.setPredictedPointsTally(0)));
 
         remainingFixtures.forEach((fixture -> {
             String resultSimulation = predictFixture(predictorCalculations, teamData, fixture.getHomeTeam(), fixture.getAwayTeam());
-            System.out.print(fixture.getHomeTeam() + " vs " + fixture.getAwayTeam() + " = ");
             switch (resultSimulation) {
                 case "home win":
-                    System.out.println(fixture.getHomeTeam() + " win");
                     updateTeamPointsTally(teamData, fixture.getHomeTeam(), 3);
                     break;
                 case "away win":
-                    System.out.println(fixture.getAwayTeam() + " win");
                     updateTeamPointsTally(teamData, fixture.getAwayTeam(), 3);
                     break;
                 case "draw":
-                    System.out.println("draw");
                     updateTeamPointsTally(teamData, fixture.getHomeTeam(), 1);
                     updateTeamPointsTally(teamData, fixture.getAwayTeam(), 1);
                     break;

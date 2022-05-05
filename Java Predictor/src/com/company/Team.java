@@ -12,6 +12,7 @@ public class Team {
     private double awayXGAgainst;
     private int currentPointsTally;
     private int predictedPointsTally;
+    private int totalPredictedPointsTally;
 
     public Team(String name, double hgf, double hga, double hxgf, double hxga, double agf, double aga, double axgf, double axga, int points) {
         this.teamName = name;
@@ -25,6 +26,7 @@ public class Team {
         this.awayXGAgainst = axga;
         this.currentPointsTally = points;
         this.predictedPointsTally = 0;
+        this.totalPredictedPointsTally = 0;
     }
 
     public String getTeamName() { return teamName; }
@@ -50,4 +52,8 @@ public class Team {
     public int getPredictedPointsTally() { return predictedPointsTally; }
 
     public void setPredictedPointsTally(int points) { this.predictedPointsTally = points; }
+
+    public int getTotalPredictedPointsTally() { return totalPredictedPointsTally; }
+
+    public void setTotalPredictedPointsTally(int points) { this.totalPredictedPointsTally = points; }
 }
